@@ -10,5 +10,5 @@ nodes_roles = [
   "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
   "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 ]
-
+repository_name = "devops_test_repo"
 username = "javier.palacios"
