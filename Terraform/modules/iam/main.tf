@@ -58,6 +58,10 @@ resource "aws_iam_policy" "s3_access_policy" {
       }
     ]
   })
+  tags = {
+    Name     = "s3_access_policy"
+    username = var.username
+  }
 }
 
 # Se añaden las politicas a cada rol
