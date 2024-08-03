@@ -14,8 +14,8 @@ jobs:
     name: 'Terraform'
     runs-on: ubuntu-latest
     env: 
-      TF_VAR_my_public_key: ${{ secrets.TF_AWS_ACCESS_KEY}}
-      TF_VAR_my_secret_key: ${{ secrets.TF_AWS_SECRET}}
+      AWS_ACCESS_KEY_ID: ${{ secrets.TF_AWS_ACCESS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_AWS_SECRET_KEY}}
 
     steps:
     - name: Checkout code
@@ -31,7 +31,11 @@ jobs:
       run: terraform validate
 
     - name: Terraform Plan
-      run: terraform plan
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.TF_AWS_ACCESS_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_AWS_SECRET_KEY }}
+      run: terraform plan -var "access_key=$TF_AWS_ACCESS_KEY" \
+           -var  "secret_key=$TF_AWS_SECRET_KEY"
 
   apply:
     if: github.event.pull_request.merged == true
