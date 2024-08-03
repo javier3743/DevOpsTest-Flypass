@@ -1,11 +1,13 @@
 region = "us-east-2"
 
-cluster_roles = [
+bucket_name = "devops_test_s3"
+
+cluster_roles_policies = [
   "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
   "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
 ]
 
-nodes_roles = [
+nodes_roles_policies = [
   "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
   "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
   "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"

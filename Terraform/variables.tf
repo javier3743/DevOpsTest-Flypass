@@ -8,12 +8,16 @@ variable "username" {
   description = "The username tag for resources"
 }
 
-variable "cluster_roles" {
+variable "bucket_name" {
+  description = "The name of the bucket"
+}
+
+variable "cluster_roles_policies" {
   description = "Cluster Admin Roles"
   type = list(string)
 }
 
-variable "nodes_roles" {
+variable "nodes_roles_policies" {
   description = "Node Admin Roles"
   type = list(string)
 }

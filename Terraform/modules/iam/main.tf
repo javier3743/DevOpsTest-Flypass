@@ -3,7 +3,7 @@ resource "aws_iam_role" "cluster_iam_role" {
   name= "cluster-role"
 
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
+    Version   = "2012-10-17"
     Statement = [{
       Action = "sts:AssumeRole"
       Effect = "Allow"
@@ -24,7 +24,7 @@ resource "aws_iam_role" "nodes_iam_role" {
   name     = "nodes-role"
 
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
+    Version   = "2012-10-17"
     Statement = [{
       Action = "sts:AssumeRole"
       Effect = "Allow"
@@ -40,10 +40,30 @@ resource "aws_iam_role" "nodes_iam_role" {
   }
 }
 
+resource "aws_iam_policy" "s3_access_policy" {
+  name        = "S3Access"
+  description = "Policy to allow access to S3 bucket from EKS"
+  policy      = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = [
+          "s3:PutObject",
+        ]
+        Resource = [
+          "${var.bucket_arn}",
+          "${aws_s3_bucket.s3_bucket.arn}/*"
+        ]
+      }
+    ]
+  })
+}
+
 # Se añaden las politicas a cada rol
 
 resource "aws_iam_role_policy_attachment" "cluster_iam_policy" {
-  for_each = toset(var.cluster_roles)
+  for_each   = toset(var.cluster_roles_policies)
 
   policy_arn = each.value
   role       = "cluster-role"
@@ -52,7 +72,7 @@ resource "aws_iam_role_policy_attachment" "cluster_iam_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "nodes_iam_policy" {
-  for_each = toset(var.nodes_roles)
+  for_each   = toset(concat(var.nodes_roles_policies, [aws_iam_policy.s3_access_policy.arn]))
 
   policy_arn = each.value
   role       = "nodes-role"

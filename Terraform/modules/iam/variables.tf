@@ -1,11 +1,15 @@
-variable "cluster_roles" {
-  description = "Cluster Admin Roles"
-  type = list(string)
+variable "bucket_arn" {
+  type        = string
 }
 
-variable "nodes_roles" {
+variable "cluster_roles_policies" {
   description = "Cluster Admin Roles"
-  type = list(string)
+  type        = list(string)
+}
+
+variable "nodes_roles_policies" {
+  description = "Cluster Admin Roles"
+  type        = list(string)
 }
 
 variable "username" {
