@@ -36,6 +36,9 @@ jobs:
         TF_VAR_secret_key: ${{ secrets.TF_AWS_SECRET_KEY }}
       run: terraform plan
 
+    - name: Terraform Apply
+      run: terraform apply -auto-approve
+
   apply:
     if: github.event.pull_request.merged == true
     needs: [terraform]
