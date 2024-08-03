@@ -4,6 +4,10 @@ variable "region" {
   default     = "us-east-2"
 }
 
+variable "username" {
+  description = "The username tag for resources"
+}
+
 variable "access_key"{
   description = "AWS access key"
   type        = string
@@ -22,10 +26,11 @@ variable "cluster_roles" {
 }
 
 variable "nodes_roles" {
-  description = "Cluster Admin Roles"
+  description = "Node Admin Roles"
   type = list(string)
 }
 
-variable "username" {
-  description = "The username tag for resources"
+variable "repository_name" {
+  description = "Repo name"
+  type = string
 }
