@@ -1,9 +1,8 @@
 terraform {
   backend "s3" {
-    bucket = "states-terraform"
+    bucket = "state-terraform-javier.palacios"
     key    = "terraform.tfstate"
     region = "us-east-2"
-    access_key = "${var.access_key}"
-    secret_key = "${var.secret_key}"
+    dynamodb_table = "terraform-state-lock"
   }
 }
