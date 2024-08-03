@@ -72,10 +72,15 @@ resource "aws_iam_role_policy_attachment" "cluster_iam_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "nodes_iam_policy" {
-  for_each   = toset(concat(var.nodes_roles_policies, [aws_iam_policy.s3_access_policy.arn]))
+  for_each   = toset(var.nodes_roles_policies)
 
   policy_arn = each.value
   role       = "nodes-role"
 
   depends_on = [aws_iam_role.nodes_iam_role]
+}
+
+resource "aws_iam_role_policy_attachment" "attach_s3_policy" {
+  role       = "<nodes-role>"
+  policy_arn  = aws_iam_policy.s3_access_policy.arn
 }
