@@ -1,0 +1,32 @@
+name: "Build-Upload-DockerImages"
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "DockerImages/**"
+    branches:
+      - feature
+  pull_request:
+    paths:
+      - "DockerImages/**"
+    branches:
+      - develop
+
+jobs:
+  build-docker:
+    name: "Build Docker Images"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/build-push-action@v6.5.0
+
+      - name: Build and Push Docker Image
+        run: for dir in ./DockerImages/*/
+          do
+          image_name=$(basename $dir)
+          docker build -t my-dockerhub-user/$image_name:latest $dir
+          docker push my-dockerhub-user/$image_name:latest
+          done

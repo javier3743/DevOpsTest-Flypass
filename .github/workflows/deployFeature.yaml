@@ -1,18 +1,20 @@
-name: 'deploy'
+name: 'Deploy branch feature'
 
 on:
   workflow_dispatch: 
   push:
+    paths:
+      - "Terraform/**"
     branches:
       - feature
-  pull_request:
-    branches:
-      - develop
 
 jobs:
   terraform:
     name: 'Terraform'
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./Terraform
     env: 
       TF_VAR_access_key: ${{ secrets.TF_AWS_ACCESS_KEY }}
       TF_VAR_secret_key: ${{ secrets.TF_AWS_SECRET_KEY}}
@@ -35,22 +37,3 @@ jobs:
         TF_VAR_access_key: ${{ secrets.TF_AWS_ACCESS_KEY }}
         TF_VAR_secret_key: ${{ secrets.TF_AWS_SECRET_KEY }}
       run: terraform plan
-
-  apply:
-    if: github.event.pull_request.merged == true
-    needs: [terraform]
-    name: 'Terraform Apply'
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Set up Terraform
-      uses: hashicorp/setup-terraform@v3
-
-    - name: Terraform Init
-      run: terraform init
-
-    - name: Terraform Apply
-      run: terraform apply -auto-approve
