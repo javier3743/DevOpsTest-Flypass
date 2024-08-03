@@ -13,3 +13,5 @@ nodes_roles = [
     "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
     "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 ]
+
+username = "javier.palacios"
