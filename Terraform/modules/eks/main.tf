@@ -7,6 +7,7 @@ resource "aws_eks_cluster" "eks_cluster" {
     security_group_ids      = [var.eks_cluster_sg]
     subnet_ids              = var.private_subnets_ids[*]
     endpoint_public_access  = true
+    endpoint_private_access = true
   }
 
   tags = {
