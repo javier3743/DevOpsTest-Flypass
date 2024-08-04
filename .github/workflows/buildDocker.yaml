@@ -19,6 +19,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      
       - name: AWS credentials
         uses: aws-actions/configure-aws-credentials@v4.0.2
         with:
@@ -38,21 +39,18 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-  
-      - name: Set up Docker Buildx
-        uses: docker/build-push-action@v6.5.0
-        
+
       - name: Build and push Docker images
-        run: set -e
+        run: |
+          set -e
           for dir in DockerFiles/*; do
             if [ -d "$dir" ]; then
-              image_name=$dir
+              image_name=$(basename "$dir")
               echo "Building and pushing image for $image_name"
-              docker buildx build \
-                --build-arg AWS_REGION=${{ secrets.AWS_REGION }} \
+              docker build \
                 --tag ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${image_name}:latest \
                 --file "$dir/Dockerfile" \
-                "$dir" \
-                --push
+                "$dir"
+              docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${image_name}:latest
             fi
           done
