@@ -1,3 +1,3 @@
-# variable "cluster_endpoint" {
-#   description = "enpoint"
-# }
+variable "cluster_endpoint" {
+  description = "enpoint"
+}
