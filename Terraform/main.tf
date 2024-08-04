@@ -22,6 +22,7 @@ module "vpc" {
   source   = "./modules/vpc"
   username = var.username
   eks_cluster_name = var.eks_cluster_name
+  region = var.region
 }
 
 module "eks" {
@@ -32,4 +33,5 @@ module "eks" {
   node_role_arn = module.iam_role.nodes_role_arn
   private_subnets_ids = module.vpc.subnet_ids
   depends_on = [ module.iam_role, module.vpc ]
+  eks_cluster_sg = module.vpc.eks_cluster_sg
 }
