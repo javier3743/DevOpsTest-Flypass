@@ -4,7 +4,7 @@ resource "aws_eks_cluster" "eks_cluster" {
   role_arn = var.cluster_role_arn
 
   vpc_config {
-    security_group_ids      = [var.eks_cluster_sg]
+    security_group_ids      = [var.eks_cluster_sg, var.eks_nodes_sg]
     subnet_ids              = var.private_subnets_ids[*]
     endpoint_public_access  = true
     endpoint_private_access = true
@@ -22,10 +22,6 @@ resource "aws_eks_node_group" "eks-node-group" {
   node_group_name = "eks-node-group"
   node_role_arn   = var.node_role_arn
   subnet_ids      = var.private_subnets_ids
- remote_access {
-    ec2_ssh_key = "key-0fca739baadcea3ea" 
-    source_security_group_ids = [var.eks_cluster_sg]
-  }
   timeouts {
     create = "10m"
   }
