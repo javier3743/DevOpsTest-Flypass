@@ -33,12 +33,22 @@ resource "aws_eks_addon" "vpc_cni" {
 ]
 }
 
+resource "aws_cloudwatch_log_group" "node_group" {
+  name              = "/aws/eks/${aws_eks_cluster.eks_cluster.name}/node-group"
+  retention_in_days = 30
+}
+
+resource "aws_cloudwatch_log_stream" "node_group" {
+  name           = "node-group-*" # Use a wildcard pattern
+  log_group_name = aws_cloudwatch_log_group.node_group.name
+}
+
 # Crear el grupo de nodos EKS
 resource "aws_eks_node_group" "node_group" {
   cluster_name    = aws_eks_cluster.eks_cluster.name
   node_group_name = "node-group-worker"
   node_role_arn   = var.node_role_arn
-  subnet_ids      = var.private_subnets_ids[*]
+  subnet_ids      = var.private_subnets_ids
 
   scaling_config {
     desired_size = 2
