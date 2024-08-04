@@ -15,13 +15,6 @@ resource "aws_eks_cluster" "eks_cluster" {
     username = var.username
   }
 }
-# Agregar el add-on de Amazon VPC CNI
-resource "aws_eks_addon" "vpc_cni" {
-  cluster_name = aws_eks_cluster.eks_cluster.name
-  addon_name   = "vpc-cni"
-  service_account_role_arn = var.cluster_role_arn
-  depends_on   = [ aws_eks_cluster.eks_cluster ]
-}
 
 # Crear el grupo de nodos EKS
 resource "aws_eks_node_group" "eks-node-group" {
