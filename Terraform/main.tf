@@ -12,11 +12,11 @@ module "iam_role" {
   bucket_arn             = module.s3_bucket.bucket_arn
 }
 
-module "ecr-repo" {
-  source          = "./modules/ecr"
-  username        = var.username
-  repository_name = var.repository_name
-}
+# module "ecr-repo" {
+#   source          = "./modules/ecr"
+#   username        = var.username
+#   repository_name = var.repository_name
+# }
 
 module "vpc" {
   source   = "./modules/vpc"
