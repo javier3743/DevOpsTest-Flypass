@@ -19,10 +19,7 @@ resource "aws_eks_addon" "vpc_cni" {
   cluster_name = aws_eks_cluster.eks_cluster.name
   addon_name   = "vpc-cni"
   service_account_role_arn = var.cluster_role_arn
-  depends_on   = [ aws_eks_cluster.eks_cluster,
-                   aws_cloudwatch_log_group.vpc_cni_addon,
-                   aws_cloudwatch_log_stream.vpc_cni_addon
-]
+  depends_on   = [ aws_eks_cluster.eks_cluster ]
 }
 
 # Crear el grupo de nodos EKS
