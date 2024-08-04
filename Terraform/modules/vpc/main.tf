@@ -9,6 +9,22 @@ resource "aws_vpc" "vpc_eks" {
     "kubernetes.io/cluster/${var.eks_cluster_name}" = "shared"
   }
 }
+
+resource "aws_vpc_dhcp_options" "main_eks" {
+  domain_name          = format("%s.compute.internal", var.region)
+  domain_name_servers  = ["AmazonProvidedDNS"]
+  
+  tags = {
+    Name = "vpc_dhcp_eks"
+    username = var.username
+  }
+}
+
+resource "aws_vpc_dhcp_options_association" "dns_resolver" {
+  vpc_id          = aws_vpc.vpc_eks.id
+  dhcp_options_id = aws_vpc_dhcp_options.main_eks.id
+}
+
 resource "aws_internet_gateway" "eks_igw" {
   vpc_id = aws_vpc.vpc_eks.id
 }
