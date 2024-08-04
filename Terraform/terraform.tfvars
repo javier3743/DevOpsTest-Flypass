@@ -1,6 +1,6 @@
 region = "us-east-2"
 username = "javier.palacios"
-bucket_name = "devops-test-s3"
+bucket_name = "devops-test-s3-jpg"
 repository_name = "devops-test-repo"
 eks_cluster_name = "devops-test-cluster"
 
