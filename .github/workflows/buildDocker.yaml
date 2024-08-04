@@ -20,13 +20,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Validate ECR connection
+        id: ecr-validate
+        run: |
+          set -e
+          if ! aws ecr describe-repositories --region ${{ secrets.AWS_REGION }} > /dev/null 2>&1; then
+            echo "Error: Unable to connect to ECR. Please check your AWS credentials and region settings."
+            exit 1
+          fi
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+  
       - name: Set up Docker Buildx
         uses: docker/build-push-action@v6.5.0
 
-      - name: Build and Push Docker Image
-        run: for dir in ./DockerImages/*/
-          do
-          image_name=$(basename $dir)
-          docker build -t my-dockerhub-user/$image_name:latest $dir
-          docker push my-dockerhub-user/$image_name:latest
-          done
+      # - name: Build and Push Docker Image
+      #   run: for dir in ./DockerImages/*/
+      #     do
+      #     image_name=$(basename $dir)
+      #     docker build -t my-dockerhub-user/$image_name:latest $dir
+      #     docker push my-dockerhub-user/$image_name:latest
+      #     done
