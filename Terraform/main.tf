@@ -23,3 +23,12 @@ module "vpc" {
   username = var.username
   eks_cluster_name = var.eks_cluster_name
 }
+
+module "eks" {
+  source   = "./modules/eks"
+  username = var.username
+  eks_cluster_name = var.eks_cluster_name
+  cluster_role_arn = module.iam_role.cluster_role_arn
+  node_role_arn = module.iam_role.nodes_role_arn
+  private_subnets_ids = module.vpc.subnet_ids
+}
