@@ -148,7 +148,7 @@ resource "aws_security_group_rule" "eks_control_plane_ingress_self" {
 }
 
 # Add ingress rules to the EKS control plane security group
-resource "aws_security_group_rule" "eks_control_plane_ingress" {
+resource "aws_security_group_rule" "eks_control_plane_ingress_kubelet" {
   security_group_id = aws_security_group.eks_control_plane_sg.id
   type              = "ingress"
   from_port         = 10250
@@ -158,7 +158,7 @@ resource "aws_security_group_rule" "eks_control_plane_ingress" {
 }
 
 # Add ingress rules to the EKS worker nodes security group
-resource "aws_security_group_rule" "eks_worker_nodes_ingress_control_plane" {
+resource "aws_security_group_rule" "eks_worker_nodes_ingress_kubelet" {
   security_group_id        = aws_security_group.eks_worker_nodes_sg.id
   type                     = "ingress"
   from_port                = 10250
