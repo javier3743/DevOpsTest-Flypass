@@ -15,5 +15,8 @@ variable "username" {
   description = "The username tag for resources"
 }
 variable "eks_cluster_sg" {
-  description = "id security"
+  description = "id security cluster"
+}
+variable "eks_nodes_sg" {
+  description = "id security nodes"
 }

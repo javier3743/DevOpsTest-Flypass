@@ -34,4 +34,5 @@ module "eks" {
   private_subnets_ids = module.vpc.subnet_ids
   depends_on = [ module.iam_role, module.vpc ]
   eks_cluster_sg = module.vpc.eks_cluster_sg
+  eks_nodes_sg = module.vpc.eks_nodes_sg
 }

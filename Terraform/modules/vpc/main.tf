@@ -157,8 +157,8 @@ resource "aws_security_group_rule" "eks-cluster-ingress-node-https" {
 }
 
 # Create the EKS workers security group
-resource "aws_security_group" "eks_worker_cluster_sg" {
-  name        = "eks_worker_cluster_sg"
+resource "aws_security_group" "eks_worker_sg" {
+  name        = "eks_worker_sg"
   description = "Security group for all nodes in the cluster"
   vpc_id      = aws_vpc.vpc_eks.id
 
@@ -178,7 +178,7 @@ resource "aws_security_group_rule" "eks-worker-cluster-ingress-self" {
   description              = "Allow node to communicate with each other"
   from_port                = 0
   protocol                 = "-1"
-  security_group_id        = aws_security_group.eks_worker_cluster_sg.id
+  security_group_id        = aws_security_group.eks_worker_sg.id
   cidr_blocks              = ["10.0.0.0/16"]
   to_port                  = 65535
   type                     = "ingress"
@@ -188,7 +188,7 @@ resource "aws_security_group_rule" "eks-worker-cluster-ingress-cluster" {
   description              = "Allow worker Kubelets and pods to receive communication from the cluster control plane"
   from_port                = 1025
   protocol                 = "tcp"
-  security_group_id        = aws_security_group.eks_worker_cluster_sg.id
+  security_group_id        = aws_security_group.eks_worker_sg.id
   cidr_blocks              = ["10.0.0.0/16"]
   to_port                  = 65535
   type                     = "ingress"
