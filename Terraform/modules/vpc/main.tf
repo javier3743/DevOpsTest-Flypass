@@ -151,7 +151,7 @@ resource "aws_security_group_rule" "eks-cluster-ingress-node-https" {
   from_port                = 443
   protocol                 = "tcp"
   security_group_id        = aws_security_group.eks_cluster_sg.id
-  cidr_blocks              = ["10.0.0.0/24", "10.0.1.0/24", "10.0.4.0/24", "10.0.5.0/24"]
+  cidr_blocks              = ["10.0.0.0/16"]
   to_port                  = 443
   type                     = "ingress"
 }
@@ -179,7 +179,7 @@ resource "aws_security_group_rule" "eks-worker-cluster-ingress-self" {
   from_port                = 0
   protocol                 = "-1"
   security_group_id        = aws_security_group.eks_worker_cluster_sg.id
-  cidr_blocks              = ["10.0.0.0/24", "10.0.1.0/24"]
+  cidr_blocks              = ["10.0.0.0/16"]
   to_port                  = 65535
   type                     = "ingress"
 }
@@ -189,7 +189,7 @@ resource "aws_security_group_rule" "eks-worker-cluster-ingress-cluster" {
   from_port                = 1025
   protocol                 = "tcp"
   security_group_id        = aws_security_group.eks_worker_cluster_sg.id
-  cidr_blocks              = ["10.0.4.0/24", "10.0.5.0/24", "10.0.0.0/24", "10.0.1.0/24"]
+  cidr_blocks              = ["10.0.0.0/16"]
   to_port                  = 65535
   type                     = "ingress"
 }
