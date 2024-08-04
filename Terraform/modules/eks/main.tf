@@ -5,8 +5,7 @@ resource "aws_eks_cluster" "eks_cluster" {
 
   vpc_config {
     subnet_ids              = var.private_subnets_ids[*]
-    endpoint_private_access = true
-    endpoint_public_access  = false
+    endpoint_public_access  = true
   }
 
   tags = {
@@ -14,11 +13,11 @@ resource "aws_eks_cluster" "eks_cluster" {
     username = var.username
   }
 }
-### TODO: continue acomodando nodes eks
+
 # Crear el grupo de nodos EKS
 resource "aws_eks_node_group" "node_group" {
   cluster_name    = aws_eks_cluster.eks_cluster.name
-  node_group_name = "node-group1"
+  node_group_name = "node-group"
   node_role_arn   = var.node_role_arn
   subnet_ids      = var.private_subnets_ids[*]
 
