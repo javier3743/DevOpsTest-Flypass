@@ -14,3 +14,6 @@ variable "private_subnets_ids" {
 variable "username" {
   description = "The username tag for resources"
 }
+variable "eks_cluster_sg" {
+  description = "id security"
+}
