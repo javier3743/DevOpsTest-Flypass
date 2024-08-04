@@ -6,7 +6,7 @@ resource "aws_vpc" "vpc_eks" {
   tags = {
     Name = "vpc_eks"
     username = var.username
-    "kubernetes.io/cluster/${var.eks_cluster_name}" = "owned"
+    "kubernetes.io/cluster/${var.eks_cluster_name}" = "shared"
   }
 }
 resource "aws_internet_gateway" "eks_igw" {
@@ -36,7 +36,7 @@ resource "aws_subnet" "eks_public_subnets" {
   tags = {
     Name = "eks-public-subnet"
     username = var.username
-    "kubernetes.io/cluster/${var.eks_cluster_name}" = "owned"
+    "kubernetes.io/cluster/${var.eks_cluster_name}" = "shared"
   }
 }
 
@@ -45,8 +45,6 @@ resource "aws_eip" "nat_eip" {
   count = length(aws_subnet.eks_private_subnets.*.id)
   domain = "vpc"
 }
-
-
 
 resource "aws_nat_gateway" "eks_nat" {
   count = length(aws_subnet.eks_public_subnets.*.id)

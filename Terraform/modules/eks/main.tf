@@ -13,13 +13,24 @@ resource "aws_eks_cluster" "eks_cluster" {
     username = var.username
   }
 }
+resource "aws_cloudwatch_log_group" "vpc_cni_addon" {
+  name              = "/aws/eks/${data.terraform_remote_state.eks.outputs.cluster_name}/vpc-cni"
+  retention_in_days = 30
+}
 
+resource "aws_cloudwatch_log_stream" "vpc_cni_addon" {
+  name           = "vpc-cni-addon"
+  log_group_name = aws_cloudwatch_log_group.vpc_cni_addon.name
+}
 # Agregar el add-on de Amazon VPC CNI
 resource "aws_eks_addon" "vpc_cni" {
   cluster_name = aws_eks_cluster.eks_cluster.name
   addon_name   = "vpc-cni"
   service_account_role_arn = var.cluster_role_arn
-
+  depends_on   = [ aws_eks_cluster.eks_cluster,
+                   aws_cloudwatch_log_group.vpc_cni_addon,
+                   aws_cloudwatch_log_stream.vpc_cni_addon
+]
 }
 
 # Crear el grupo de nodos EKS
