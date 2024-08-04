@@ -3,12 +3,12 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - "DockerImages/**"
+      - "DockerFiles/**"
     branches:
       - feature
   pull_request:
     paths:
-      - "DockerImages/**"
+      - "DockerFiles/**"
     branches:
       - develop
 
@@ -19,14 +19,38 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      
+      - name: AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4.0.2
+        with:
+          aws-access-key-id: ${{ secrets.TF_AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.TF_AWS_SECRET_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Set up Docker Buildx
-        uses: docker/build-push-action@v6.5.0
+      - name: Validate ECR connection
+        id: ecr-validate
+        run: |
+          set -e
+          if ! aws ecr describe-repositories --region ${{ secrets.AWS_REGION }} > /dev/null 2>&1; then
+            echo "Error: Unable to connect to ECR. Please check your AWS credentials and region settings."
+            exit 1
+          fi
 
-      - name: Build and Push Docker Image
-        run: for dir in ./DockerImages/*/
-          do
-          image_name=$(basename $dir)
-          docker build -t my-dockerhub-user/$image_name:latest $dir
-          docker push my-dockerhub-user/$image_name:latest
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Docker images
+        run: |
+          set -e
+          for dir in DockerFiles/*; do
+            if [ -d "$dir" ]; then
+              image_name=$(basename "$dir")
+              echo "Building and pushing image for $image_name"
+              docker build \
+                --tag ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:${image_name} \
+                --file "$dir/Dockerfile" \
+                "$dir"
+              docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPOSITORY_NAME }}:${image_name}
+            fi
           done

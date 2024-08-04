@@ -85,6 +85,6 @@ resource "aws_iam_role_policy_attachment" "nodes_iam_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "attach_s3_policy" {
-  role       = "<nodes-role>"
+  role       = "nodes-role"
   policy_arn  = aws_iam_policy.s3_access_policy.arn
 }
