@@ -14,7 +14,7 @@ resource "aws_eks_cluster" "eks_cluster" {
   }
 }
 resource "aws_cloudwatch_log_group" "vpc_cni_addon" {
-  name              = "/aws/eks/${data.terraform_remote_state.eks.outputs.cluster_name}/vpc-cni"
+  name              = "/aws/eks/${aws_eks_cluster.eks_cluster.name}/vpc-cni"
   retention_in_days = 30
 }
 
