@@ -50,7 +50,7 @@ resource "aws_eks_node_group" "node_group" {
   node_role_arn   = var.node_role_arn
   subnet_ids      = var.private_subnets_ids
   timeouts {
-    create = 5
+    create = "5"
   }
   scaling_config {
     desired_size = 2
