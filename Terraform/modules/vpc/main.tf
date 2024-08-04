@@ -23,18 +23,32 @@ resource "aws_subnet" "private_subnets" {
     username = var.username
   }
 }
+# Create public subnet for access form private subnets to internet
+resource "aws_subnet" "eks_public_subnet" {
+  vpc_id = aws_vpc.vpc_eks.id
+  cidr_block = var.public_subnet_cidr_block
+  availability_zone = data.aws_availability_zones.available.names[0]
+  map_public_ip_on_launch = true
+  tags = {
+    Name = "eks-public-subnet"
+    username = var.username
+  }
+}
 
 # Create nat for the public subnets
 resource "aws_eip" "nat_eip" {
 }
 
-resource "aws_nat_gateway" "nat_gateway" {
+resource "aws_internet_gateway" "eks_igw" {
+  vpc_id = aws_vpc.vpc_eks.id
+}
+
+resource "aws_nat_gateway" "eks_nat" {
   allocation_id = aws_eip.nat_eip.id
-  subnet_id     = aws_subnet.private_subnets[0].id # Use one of the private subnets
+  subnet_id     = aws_subnet.eks_public_subnet.id
 
   tags = {
     Name = "eks-nat-gateway"
-    username = var.username
   }
 }
 
@@ -43,12 +57,11 @@ resource "aws_route_table" "eks_private_route_table" {
 
   route {
     cidr_block = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.nat_gateway.id
+    nat_gateway_id = aws_nat_gateway.eks_nat.id
   }
 
   tags = {
     Name = "eks-private-route-table"
-    username = var.username
   }
 }
 
