@@ -3,12 +3,12 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - "DockerImages/**"
+      - "DockerFiles/**"
     branches:
       - feature
   pull_request:
     paths:
-      - "DockerImages/**"
+      - "DockerFiles/**"
     branches:
       - develop
 
@@ -44,7 +44,7 @@ jobs:
         
       - name: Build and push Docker images
         run: set -e
-          for dir in DockerImages/*; do
+          for dir in DockerFiles/*; do
             if [ -d "$dir" ]; then
               image_name=$dir
               echo "Building and pushing image for $image_name"
