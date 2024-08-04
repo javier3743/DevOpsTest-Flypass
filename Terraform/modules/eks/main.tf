@@ -39,7 +39,6 @@ resource "aws_eks_node_group" "eks-node-group" {
   }
 
   depends_on = [
-    aws_eks_cluster.eks_cluster,
-    aws_eks_addon.vpc_cni
+    aws_eks_cluster.eks_cluster
   ]
 }
