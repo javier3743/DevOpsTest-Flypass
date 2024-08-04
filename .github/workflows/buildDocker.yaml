@@ -41,11 +41,18 @@ jobs:
   
       - name: Set up Docker Buildx
         uses: docker/build-push-action@v6.5.0
-
-      # - name: Build and Push Docker Image
-      #   run: for dir in ./DockerImages/*/
-      #     do
-      #     image_name=$(basename $dir)
-      #     docker build -t my-dockerhub-user/$image_name:latest $dir
-      #     docker push my-dockerhub-user/$image_name:latest
-      #     done
+        
+      - name: Build and push Docker images
+        run: set -e
+          for dir in DockerImages/*; do
+            if [ -d "$dir" ]; then
+              image_name=$dir
+              echo "Building and pushing image for $image_name"
+              docker buildx build \
+                --build-arg AWS_REGION=${{ secrets.AWS_REGION }} \
+                --tag ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${image_name}:latest \
+                --file "$dir/Dockerfile" \
+                "$dir" \
+                --push
+            fi
+          done
