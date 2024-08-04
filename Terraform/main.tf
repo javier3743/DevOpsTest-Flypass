@@ -31,4 +31,5 @@ module "eks" {
   cluster_role_arn = module.iam_role.cluster_role_arn
   node_role_arn = module.iam_role.nodes_role_arn
   private_subnets_ids = module.vpc.subnet_ids
+  depends_on = [ module.iam_role ]
 }
