@@ -24,6 +24,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.TF_AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.TF_AWS_SECRET_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Validate ECR connection
         id: ecr-validate
