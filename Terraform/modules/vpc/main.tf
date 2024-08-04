@@ -77,69 +77,94 @@ resource "aws_route_table_association" "private_subnet_associations" {
   route_table_id = aws_route_table.private_route_tables[count.index].id
 }
 
+# Create the EKS control plane security group
 resource "aws_security_group" "eks_control_plane_sg" {
   vpc_id = aws_vpc.vpc_eks.id
 
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"] # Allow access from anywhere, adjust as needed
-  }
-  ingress {
-    from_port       = 10250
-    to_port         = 10250
-    protocol        = "tcp"
-    security_groups = [aws_security_group.eks_worker_nodes_sg.id]
-    description     = "Allow inbound traffic from worker nodes for Kubelet"
-  }
-  ingress {
-    from_port       = 8285
-    to_port         = 8285
-    protocol        = "udp"
-    security_groups = [aws_security_group.eks_worker_nodes_sg.id]
-    description     = "Allow inbound traffic from worker nodes for VPC CNI add-on"
+  egress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    cidr_blocks     = ["0.0.0.0/0"]
   }
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+  tags = {
+    Name = "eks-control-plane-sg"
   }
 }
 
+# Create the EKS worker nodes security group
 resource "aws_security_group" "eks_worker_nodes_sg" {
   vpc_id = aws_vpc.vpc_eks.id
-  ingress {
-    from_port       = 443
-    to_port         = 443
-    protocol        = "tcp"
-    security_groups = [aws_security_group.eks_control_plane_sg.id]
-    description     = "Allow inbound traffic from control plane"
-  }
-  ingress {
-    from_port       = 10250
-    to_port         = 10250
-    protocol        = "tcp"
-    security_groups = [aws_security_group.eks_control_plane_sg.id]
-    description     = "Allow inbound traffic from control plane for Kubelet"
-  }
-
-  ingress {
-    from_port       = 8285
-    to_port         = 8285
-    protocol        = "udp"
-    self            = true
-    description     = "Allow inbound traffic for VPC CNI add-on"
-  }
 
   egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    cidr_blocks     = ["0.0.0.0/0"]
   }
+
+  tags = {
+    Name = "eks-worker-nodes-sg"
+  }
+}
+
+# Add ingress rules to the EKS control plane security group
+resource "aws_security_group_rule" "eks_control_plane_ingress" {
+  security_group_id = aws_security_group.eks_control_plane_sg.id
+  type              = "ingress"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  cidr_blocks       = ["10.0.0.0/16"]
+}
+
+# Add ingress rules to the EKS worker nodes security group
+resource "aws_security_group_rule" "eks_worker_nodes_ingress_control_plane" {
+  security_group_id        = aws_security_group.eks_worker_nodes_sg.id
+  type                     = "ingress"
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.eks_control_plane_sg.id
+}
+
+resource "aws_security_group_rule" "eks_worker_nodes_ingress_self" {
+  security_group_id = aws_security_group.eks_worker_nodes_sg.id
+  type              = "ingress"
+  from_port         = 8285
+  to_port           = 8285
+  protocol          = "udp"
+  self              = true
+}
+
+resource "aws_security_group_rule" "eks_control_plane_ingress_self" {
+  security_group_id = aws_security_group.eks_control_plane_sg.id
+  type              = "ingress"
+  from_port         = 8285
+  to_port           = 8285
+  protocol          = "udp"
+  self              = true
+}
+
+# Add ingress rules to the EKS control plane security group
+resource "aws_security_group_rule" "eks_control_plane_ingress" {
+  security_group_id = aws_security_group.eks_control_plane_sg.id
+  type              = "ingress"
+  from_port         = 10250
+  to_port           = 10250
+  protocol          = "tcp"
+  cidr_blocks       = ["10.0.0.0/16"]
+}
+
+# Add ingress rules to the EKS worker nodes security group
+resource "aws_security_group_rule" "eks_worker_nodes_ingress_control_plane" {
+  security_group_id        = aws_security_group.eks_worker_nodes_sg.id
+  type                     = "ingress"
+  from_port                = 10250
+  to_port                  = 10250
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.eks_control_plane_sg.id
 }
 
 
