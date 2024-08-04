@@ -8,7 +8,9 @@ resource "aws_vpc" "vpc_eks" {
     "kubernetes.io/cluster/${var.eks_cluster_name}" = "shared"
   }
 }
-
+resource "aws_internet_gateway" "eks_igw" {
+  vpc_id = aws_vpc.vpc_eks.id
+}
 # # Create the private subnet
 # resource "aws_subnet" "private_subnets" {
 #   count             = 3
@@ -25,7 +27,7 @@ resource "aws_vpc" "vpc_eks" {
 # }
 # Create public subnet for access form private subnets to internet
 resource "aws_subnet" "eks_public_subnet" {
-  count = 3
+  count = 2
   vpc_id = aws_vpc.vpc_eks.id
   cidr_block = element(var.public_subnet_cidr_block, count.index)
   availability_zone = data.aws_availability_zones.available.names[0]
@@ -40,9 +42,7 @@ resource "aws_subnet" "eks_public_subnet" {
 # resource "aws_eip" "nat_eip" {
 # }
 
-resource "aws_internet_gateway" "eks_igw" {
-  vpc_id = aws_vpc.vpc_eks.id
-}
+
 
 # resource "aws_nat_gateway" "eks_nat" {
 #   allocation_id = aws_eip.nat_eip.id
@@ -58,7 +58,7 @@ resource "aws_route_table" "eks_private_route_table" {
 
   route {
     cidr_block = "0.0.0.0/0"
-    nat_gateway_id = aws_internet_gateway.eks_igw.id
+    gateway_id = aws_internet_gateway.eks_igw.id
   }
 
   tags = {
@@ -67,7 +67,7 @@ resource "aws_route_table" "eks_private_route_table" {
 }
 
 resource "aws_route_table_association" "eks_private_route_table_association" {
-  count = 3
+  count = 2
   subnet_id = element(aws_subnet.eks_public_subnet.*.id, count.index)
   route_table_id = aws_route_table.eks_private_route_table.id
 }
