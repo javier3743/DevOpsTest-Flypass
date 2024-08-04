@@ -1,7 +1,7 @@
 # Configuracion de red VPC
 resource "aws_vpc" "vpc_eks" {
-  cidr_block       = var.vpc_cidr_block
-
+  cidr_block           = var.vpc_cidr_block
+  enable_dns_hostnames = true
   tags = {
     Name = "vpc_eks"
     username = var.username

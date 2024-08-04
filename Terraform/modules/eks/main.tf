@@ -18,7 +18,7 @@ resource "aws_eks_cluster" "eks_cluster" {
 # Crear el grupo de nodos EKS
 resource "aws_eks_node_group" "node_group" {
   cluster_name    = aws_eks_cluster.eks_cluster.name
-  node_group_name = "node-group"
+  node_group_name = "node-group1"
   node_role_arn   = var.node_role_arn
   subnet_ids      = var.private_subnets_ids[*]
 
