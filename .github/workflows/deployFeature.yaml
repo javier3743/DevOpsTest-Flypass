@@ -40,3 +40,9 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.TF_AWS_ACCESS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_AWS_SECRET_KEY}}
       run: terraform plan
+    
+    - name: Terraform Apply
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.TF_AWS_ACCESS_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_AWS_SECRET_KEY}}
+      run: terraform apply -auto-approve  
