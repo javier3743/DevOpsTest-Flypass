@@ -14,6 +14,14 @@ resource "aws_eks_cluster" "eks_cluster" {
   }
 }
 
+# Agregar el add-on de Amazon VPC CNI
+resource "aws_eks_addon" "vpc_cni" {
+  cluster_name = aws_eks_cluster.eks_cluster.name
+  addon_name   = "vpc-cni"
+  service_account_role_arn = var.cluster_role_arn
+
+}
+
 # Crear el grupo de nodos EKS
 resource "aws_eks_node_group" "node_group" {
   cluster_name    = aws_eks_cluster.eks_cluster.name
@@ -24,7 +32,7 @@ resource "aws_eks_node_group" "node_group" {
   scaling_config {
     desired_size = 2
     max_size     = 3
-    min_size     = 1
+    min_size     = 2
   }
 
   instance_types = ["t2.nano"]
