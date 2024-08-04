@@ -4,6 +4,7 @@ resource "aws_vpc" "vpc_eks" {
 
   tags = {
     Name = "vpc_eks"
+    username = var.username
     "kubernetes.io/cluster/${var.eks_cluster_name}" = "shared"
   }
 }
@@ -18,6 +19,7 @@ resource "aws_subnet" "private_subnets" {
     Name = "private_subnets"
     "kubernetes.io/cluster/${var.eks_cluster_name}" = "shared"
     "kubernetes.io/role/internal-elb" = 1
+    username = var.username
   }
 }
 
@@ -27,6 +29,7 @@ resource "aws_internet_gateway" "internet_gw" {
 
   tags = {
     Name = "internet_gw"
+    username = var.username
   }
 }
 
@@ -41,6 +44,7 @@ resource "aws_route_table" "eks_route_table" {
 
   tags = {
     Name = "eks-route-table"
+    username = var.username
   }
 }
 resource "aws_route_table_association" "eks_route_table_association" {
