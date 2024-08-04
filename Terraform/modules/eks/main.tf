@@ -13,10 +13,6 @@ resource "aws_eks_cluster" "eks_cluster" {
     Name     = "eks_cluster"
     username = var.username
   }
-
-  depends_on = [
-    aws_iam_role_policy_attachment.eks_role_attachment  ## TODO: dependecy en el main
-  ]
 }
 ### TODO: continue acomodando nodes eks
 # Crear el grupo de nodos EKS
