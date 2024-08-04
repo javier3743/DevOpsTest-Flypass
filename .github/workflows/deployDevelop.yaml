@@ -2,7 +2,7 @@ name: 'Deploy branch develop'
 
 on:
   workflow_dispatch:
-  pull_request:
+  push:
     paths:
       - "Terraform/**"
     branches:
@@ -10,7 +10,6 @@ on:
 
 jobs:
   apply:
-    if: github.event.pull_request.merged == true
     name: 'Terraform Apply'
     runs-on: ubuntu-latest
 
