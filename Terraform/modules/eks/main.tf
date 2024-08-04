@@ -23,7 +23,7 @@ resource "aws_eks_node_group" "eks-node-group" {
   node_role_arn   = var.node_role_arn
   subnet_ids      = var.private_subnets_ids
  remote_access {
-    ec2_ssh_key = "s" 
+    ec2_ssh_key = "key-0fca739baadcea3ea" 
     source_security_group_ids = [var.eks_cluster_sg]
   }
   timeouts {
