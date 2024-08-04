@@ -39,7 +39,7 @@ resource "aws_cloudwatch_log_group" "node_group" {
 }
 
 resource "aws_cloudwatch_log_stream" "node_group" {
-  name           = "node-group-*" # Use a wildcard pattern
+  name           = "node-group" # Use a wildcard pattern
   log_group_name = aws_cloudwatch_log_group.node_group.name
 }
 
@@ -49,7 +49,9 @@ resource "aws_eks_node_group" "node_group" {
   node_group_name = "node-group-worker"
   node_role_arn   = var.node_role_arn
   subnet_ids      = var.private_subnets_ids
-
+  timeouts {
+    create = 5
+  }
   scaling_config {
     desired_size = 2
     max_size     = 3
@@ -59,7 +61,7 @@ resource "aws_eks_node_group" "node_group" {
   instance_types = ["t2.nano"]
 
   tags = {
-    Name     = "group"
+    Name     = "node-group-worker"
     username = var.username
   }
 
