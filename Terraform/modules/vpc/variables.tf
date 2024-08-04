@@ -16,7 +16,7 @@ variable "private_subnet_cidr_blocks" {
 }
 
 variable "public_subnet_cidr_block" {
-  type = sting
+  type = string
   default = "10.0.2.0/24"
   description = "CIDR block ranges public subnets"
 }
