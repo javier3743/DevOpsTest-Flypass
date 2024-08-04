@@ -57,11 +57,12 @@ resource "aws_nat_gateway" "eks_nat" {
 }
 # Create private route tables for each Availability Zone
 resource "aws_route_table" "private_route_tables" {
+  count  = length(aws_subnet.eks_private_subnets)
   vpc_id = aws_vpc.vpc_eks.id
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_nat_gateway.eks_nat[count.index].id
+    gateway_id = element(aws_nat_gateway.eks_nat.*.id, count.index)
   }
 
   tags = {
