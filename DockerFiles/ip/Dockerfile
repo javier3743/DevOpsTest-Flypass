@@ -1,7 +1,7 @@
 # Use an official base image
 FROM ubuntu:latest
 
-# Install cron and other dependencies
+# Install cron
 RUN apt-get update && \
     apt-get install -y cron curl
 
