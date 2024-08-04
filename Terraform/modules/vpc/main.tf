@@ -24,32 +24,36 @@ resource "aws_subnet" "private_subnets" {
   }
 }
 
-# Create IGW for the public subnets
-resource "aws_internet_gateway" "internet_gw" {
-  vpc_id = aws_vpc.vpc_eks.id
+# Create nat for the public subnets
+resource "aws_eip" "nat_eip" {
+}
+
+resource "aws_nat_gateway" "nat_gateway" {
+  allocation_id = aws_eip.nat_eip.id
+  subnet_id     = aws_subnet.private_subnets[0].id # Use one of the private subnets
 
   tags = {
-    Name = "internet_gw"
+    Name = "eks-nat-gateway"
     username = var.username
   }
 }
 
-# Route traffic through the IGW
-resource "aws_route_table" "eks_route_table" {
+resource "aws_route_table" "eks_private_route_table" {
   vpc_id = aws_vpc.vpc_eks.id
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.internet_gw.id
+    nat_gateway_id = aws_nat_gateway.nat_gateway.id
   }
 
   tags = {
-    Name = "eks-route-table"
+    Name = "eks-private-route-table"
     username = var.username
   }
 }
-resource "aws_route_table_association" "eks_route_table_association" {
+
+resource "aws_route_table_association" "eks_private_route_table_association" {
   count = 3
   subnet_id = element(aws_subnet.private_subnets.*.id, count.index)
-  route_table_id = aws_route_table.eks_route_table.id
+  route_table_id = aws_route_table.eks_private_route_table.id
 }
