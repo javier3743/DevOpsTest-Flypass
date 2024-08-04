@@ -49,7 +49,7 @@ resource "aws_eip" "nat_eip" {
 resource "aws_nat_gateway" "eks_nat" {
   count = length(aws_subnet.eks_public_subnets.*.id)
   allocation_id = aws_eip.nat_eip[count.index].id
-  subnet_id     = aws_subnet.eks_public_subnets.id[count.index]
+  subnet_id     = aws_subnet.eks_public_subnets[count.index].id
 
   tags = {
     Name = "eks-nat-gateway"
