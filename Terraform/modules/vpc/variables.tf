@@ -1,5 +1,5 @@
 variable "region" {
-  description = "The region"
+  description = "AWS region"
 }
 
 variable "eks_cluster_name" {
@@ -26,5 +26,5 @@ variable "public_subnet_cidr_block" {
 }
 
 variable "username" {
-  description = "The username tag for resources"
+  description = "Username tag for resources"
 }

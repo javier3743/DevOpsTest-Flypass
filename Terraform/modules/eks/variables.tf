@@ -12,11 +12,11 @@ variable "private_subnets_ids" {
   description = "Subnets for cluster"
 }
 variable "username" {
-  description = "The username tag for resources"
+  description = "Username tag for resources"
 }
 variable "eks_cluster_sg" {
-  description = "id security cluster"
+  description = "sg cluster"
 }
 variable "eks_nodes_sg" {
-  description = "id security nodes"
+  description = "sg nodes"
 }

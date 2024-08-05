@@ -13,5 +13,5 @@ variable "nodes_roles_policies" {
 }
 
 variable "username" {
-  description = "The username tag for resources"
+  description = "Username tag for resources"
 }
