@@ -5,29 +5,29 @@ variable "region" {
 }
 
 variable "username" {
-  description = "The username tag for resources"
+  description = "Username tag for resources"
 }
 
 variable "bucket_name" {
-  description = "The name of the bucket"
+  description = "Name of the bucket"
 }
 
 variable "cluster_roles_policies" {
-  description = "Cluster Admin Roles"
+  description = "Cluster roles"
   type = list(string)
 }
 
 variable "nodes_roles_policies" {
-  description = "Node Admin Roles"
+  description = "Nodes roles"
   type = list(string)
 }
 
 variable "repository_name" {
-  description = "Repo name"
+  description = "ECR repo name"
   type = string
 }
 
 variable "eks_cluster_name" {
-  description = "The name of the EKS cluster"
+  description = "EKS cluster name"
   type = string
 }
