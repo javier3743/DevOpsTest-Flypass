@@ -1,3 +1,7 @@
 variable "cluster_endpoint" {
-  description = "enpoint"
+  description = "Endpoint"
+}
+
+variable "eks_cluster_certificate_authority" {
+  description = "certificate_authority"
 }

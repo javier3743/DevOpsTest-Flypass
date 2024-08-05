@@ -6,8 +6,7 @@ eks_cluster_name = "devops-test-cluster"
 
 cluster_roles_policies = [
   "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy",
-  "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController",
-  "arn:aws:iam::aws:policy/AmazonEKSAddonsServicePolicy "
+  "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
 ]
 
 nodes_roles_policies = [

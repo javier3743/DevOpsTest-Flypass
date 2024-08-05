@@ -1,5 +1,5 @@
 variable "eks_cluster_name" {
-  description = "The name of the EKS cluster"
+  description = "EKS cluster name"
   type = string
 }
 variable "cluster_role_arn" {
@@ -12,5 +12,11 @@ variable "private_subnets_ids" {
   description = "Subnets for cluster"
 }
 variable "username" {
-  description = "The username tag for resources"
+  description = "Username tag for resources"
+}
+variable "eks_cluster_sg" {
+  description = "sg cluster"
+}
+variable "eks_nodes_sg" {
+  description = "sg nodes"
 }

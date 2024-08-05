@@ -1,5 +1,4 @@
 #!/bin/bash
-# log_ip.sh - Script to log the IP address with timestamp
 
 # Get the current IP address
 IP_ADDRESS=$(hostname -I | awk '{print $1}')

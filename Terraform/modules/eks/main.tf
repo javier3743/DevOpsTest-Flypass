@@ -4,8 +4,10 @@ resource "aws_eks_cluster" "eks_cluster" {
   role_arn = var.cluster_role_arn
 
   vpc_config {
+    #security_group_ids      = [var.eks_cluster_sg, var.eks_nodes_sg]
     subnet_ids              = var.private_subnets_ids[*]
     endpoint_public_access  = true
+    endpoint_private_access = true
   }
 
   tags = {
@@ -13,33 +15,16 @@ resource "aws_eks_cluster" "eks_cluster" {
     username = var.username
   }
 }
-resource "aws_cloudwatch_log_group" "vpc_cni_addon" {
-  name              = "/aws/eks/${data.terraform_remote_state.eks.outputs.cluster_name}/vpc-cni"
-  retention_in_days = 30
-}
-
-resource "aws_cloudwatch_log_stream" "vpc_cni_addon" {
-  name           = "vpc-cni-addon"
-  log_group_name = aws_cloudwatch_log_group.vpc_cni_addon.name
-}
-# Agregar el add-on de Amazon VPC CNI
-resource "aws_eks_addon" "vpc_cni" {
-  cluster_name = aws_eks_cluster.eks_cluster.name
-  addon_name   = "vpc-cni"
-  service_account_role_arn = var.cluster_role_arn
-  depends_on   = [ aws_eks_cluster.eks_cluster,
-                   aws_cloudwatch_log_group.vpc_cni_addon,
-                   aws_cloudwatch_log_stream.vpc_cni_addon
-]
-}
 
 # Crear el grupo de nodos EKS
-resource "aws_eks_node_group" "node_group" {
+resource "aws_eks_node_group" "eks-node-group" {
   cluster_name    = aws_eks_cluster.eks_cluster.name
-  node_group_name = "node-group"
+  node_group_name = "eks-node-group"
   node_role_arn   = var.node_role_arn
-  subnet_ids      = var.private_subnets_ids[*]
-
+  subnet_ids      = var.private_subnets_ids
+  timeouts {
+    create = "10m"
+  }
   scaling_config {
     desired_size = 2
     max_size     = 3
@@ -49,7 +34,7 @@ resource "aws_eks_node_group" "node_group" {
   instance_types = ["t2.nano"]
 
   tags = {
-    Name     = "group"
+    Name     = "node-group-worker"
     username = var.username
   }
 

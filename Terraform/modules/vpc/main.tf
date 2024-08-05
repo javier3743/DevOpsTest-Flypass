@@ -9,9 +9,31 @@ resource "aws_vpc" "vpc_eks" {
     "kubernetes.io/cluster/${var.eks_cluster_name}" = "shared"
   }
 }
-resource "aws_internet_gateway" "eks_igw" {
-  vpc_id = aws_vpc.vpc_eks.id
+
+resource "aws_vpc_dhcp_options" "main_eks" {
+  domain_name          = format("%s.compute.internal", var.region)
+  domain_name_servers  = ["AmazonProvidedDNS"]
+  
+  tags = {
+    Name = "vpc_dhcp_eks"
+    username = var.username
+  }
 }
+
+resource "aws_vpc_dhcp_options_association" "dns_resolver" {
+  vpc_id          = aws_vpc.vpc_eks.id
+  dhcp_options_id = aws_vpc_dhcp_options.main_eks.id
+}
+
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.vpc_eks.id
+
+  tags = {
+    username = var.username
+    name = "igw_eks"
+  }
+}
+
 # Create the private subnet
 resource "aws_subnet" "eks_private_subnets" {
   count             = 2
@@ -42,128 +64,132 @@ resource "aws_subnet" "eks_public_subnets" {
 
 # Create NAT for the private subnets
 resource "aws_eip" "nat_eip" {
-  count = length(aws_subnet.eks_private_subnets.*.id)
   domain = "vpc"
-}
-
-resource "aws_nat_gateway" "eks_nat" {
-  count = length(aws_subnet.eks_public_subnets.*.id)
-  allocation_id = aws_eip.nat_eip[count.index].id
-  subnet_id     = aws_subnet.eks_public_subnets[count.index].id
-
   tags = {
-    Name = "eks-nat-gateway"
+    Name = "nat_eip"
+    username = var.username
   }
 }
-# Create private route tables for each Availability Zone
-resource "aws_route_table" "private_route_tables" {
-  count  = length(aws_subnet.eks_private_subnets)
+
+resource "aws_nat_gateway" "nat" {
+  allocation_id = aws_eip.nat_eip.id
+  subnet_id     = aws_subnet.eks_public_subnets[1].id
+
+  tags = {
+    Name = "gwNAT"
+    username = var.username
+  }
+}
+#### Creating Route Table For Public & Private
+
+resource "aws_route_table" "public_rt" {
   vpc_id = aws_vpc.vpc_eks.id
 
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = element(aws_nat_gateway.eks_nat.*.id, count.index)
-  }
-
   tags = {
-    Name = "eks-private-route-table-${count.index + 1}"
+    Name = "public_rt"
+    username = var.username
   }
 }
 
-resource "aws_route_table_association" "private_subnet_associations" {
-  count          = length(aws_subnet.eks_private_subnets)
+resource "aws_route_table" "private_rt" {
+  vpc_id = aws_vpc.vpc_eks.id
+
+  tags = {
+    Name = "private_rt"
+    username = var.username
+  }
+}
+
+#### Creating Routes For IGW & NAT
+
+resource "aws_route" "igw_r" {
+  route_table_id         = aws_route_table.public_rt.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.igw.id
+}
+
+resource "aws_route" "nat" {
+  route_table_id         = aws_route_table.private_rt.id
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = aws_nat_gateway.nat.id
+}
+
+#### Creating Route Table Association For Public & Private Subnets
+
+resource "aws_route_table_association" "public_rt" {
+  count = length(aws_subnet.eks_public_subnets)
+  subnet_id      = aws_subnet.eks_public_subnets[count.index].id
+  route_table_id = aws_route_table.public_rt.id
+}
+
+resource "aws_route_table_association" "private_rt" {
+  count = length(aws_subnet.eks_private_subnets)
   subnet_id      = aws_subnet.eks_private_subnets[count.index].id
-  route_table_id = aws_route_table.private_route_tables[count.index].id
+  route_table_id = aws_route_table.private_rt.id
 }
 
 # Create the EKS control plane security group
-resource "aws_security_group" "eks_control_plane_sg" {
-  vpc_id = aws_vpc.vpc_eks.id
+resource "aws_security_group" "eks_cluster_sg" {
+  name        = "eks_cluster_sg"
+  description = "Cluster communication with worker nodes"
+  vpc_id      = aws_vpc.vpc_eks.id
 
   egress {
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-    cidr_blocks     = ["0.0.0.0/0"]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   tags = {
-    Name = "eks-control-plane-sg"
+    username = var.username
   }
 }
 
-# Create the EKS worker nodes security group
-resource "aws_security_group" "eks_worker_nodes_sg" {
-  vpc_id = aws_vpc.vpc_eks.id
-
-  egress {
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-    cidr_blocks     = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "eks-worker-nodes-sg"
-  }
-}
-
-# Add ingress rules to the EKS control plane security group
-resource "aws_security_group_rule" "eks_control_plane_ingress" {
-  security_group_id = aws_security_group.eks_control_plane_sg.id
-  type              = "ingress"
-  from_port         = 443
-  to_port           = 443
-  protocol          = "tcp"
-  cidr_blocks       = ["10.0.0.0/16"]
-}
-
-# Add ingress rules to the EKS worker nodes security group
-resource "aws_security_group_rule" "eks_worker_nodes_ingress_control_plane" {
-  security_group_id        = aws_security_group.eks_worker_nodes_sg.id
-  type                     = "ingress"
+resource "aws_security_group_rule" "eks-cluster-ingress-node-https" {
+  description              = "Allow pods to communicate with the cluster API Server"
   from_port                = 443
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.eks_cluster_sg.id
+  cidr_blocks              = ["10.0.0.0/16"]
   to_port                  = 443
-  protocol                 = "tcp"
-  source_security_group_id = aws_security_group.eks_control_plane_sg.id
-}
-
-resource "aws_security_group_rule" "eks_worker_nodes_ingress_self" {
-  security_group_id = aws_security_group.eks_worker_nodes_sg.id
-  type              = "ingress"
-  from_port         = 8285
-  to_port           = 8285
-  protocol          = "udp"
-  self              = true
-}
-
-resource "aws_security_group_rule" "eks_control_plane_ingress_self" {
-  security_group_id = aws_security_group.eks_control_plane_sg.id
-  type              = "ingress"
-  from_port         = 8285
-  to_port           = 8285
-  protocol          = "udp"
-  self              = true
-}
-
-# Add ingress rules to the EKS control plane security group
-resource "aws_security_group_rule" "eks_control_plane_ingress_kubelet" {
-  security_group_id = aws_security_group.eks_control_plane_sg.id
-  type              = "ingress"
-  from_port         = 10250
-  to_port           = 10250
-  protocol          = "tcp"
-  cidr_blocks       = ["10.0.0.0/16"]
-}
-
-# Add ingress rules to the EKS worker nodes security group
-resource "aws_security_group_rule" "eks_worker_nodes_ingress_kubelet" {
-  security_group_id        = aws_security_group.eks_worker_nodes_sg.id
   type                     = "ingress"
-  from_port                = 10250
-  to_port                  = 10250
-  protocol                 = "tcp"
-  source_security_group_id = aws_security_group.eks_control_plane_sg.id
 }
 
+# Create the EKS workers security group
+resource "aws_security_group" "eks_worker_sg" {
+  name        = "eks_worker_sg"
+  description = "Security group for all nodes in the cluster"
+  vpc_id      = aws_vpc.vpc_eks.id
 
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    username = var.username
+  }
+}
+
+resource "aws_security_group_rule" "eks-worker-cluster-ingress-self" {
+  description              = "Allow node to communicate with each other"
+  from_port                = 0
+  protocol                 = "-1"
+  security_group_id        = aws_security_group.eks_worker_sg.id
+  cidr_blocks              = ["10.0.0.0/16"]
+  to_port                  = 65535
+  type                     = "ingress"
+}
+
+resource "aws_security_group_rule" "eks-worker-cluster-ingress-cluster" {
+  description              = "Allow worker Kubelets and pods to receive communication from the cluster control plane"
+  from_port                = 1025
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.eks_worker_sg.id
+  cidr_blocks              = ["10.0.0.0/16"]
+  to_port                  = 65535
+  type                     = "ingress"
+}

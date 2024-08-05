@@ -70,7 +70,7 @@ resource "aws_iam_role_policy_attachment" "cluster_iam_policy" {
   for_each   = toset(var.cluster_roles_policies)
 
   policy_arn = each.value
-  role       = "cluster-role"
+  role       = aws_iam_role.cluster_iam_role.name
   depends_on = [aws_iam_role.cluster_iam_role]
   
 }
@@ -79,12 +79,12 @@ resource "aws_iam_role_policy_attachment" "nodes_iam_policy" {
   for_each   = toset(var.nodes_roles_policies)
 
   policy_arn = each.value
-  role       = "nodes-role"
+  role       = aws_iam_role.nodes_iam_role.name
 
   depends_on = [aws_iam_role.nodes_iam_role]
 }
 
 resource "aws_iam_role_policy_attachment" "attach_s3_policy" {
-  role       = "nodes-role"
+  role       = aws_iam_role.nodes_iam_role.name
   policy_arn  = aws_iam_policy.s3_access_policy.arn
 }

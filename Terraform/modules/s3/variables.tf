@@ -1,7 +1,7 @@
 variable "bucket_name" {
-  description = "The name of the S3 bucket"
+  description = "S3 bucket name"
 }
 
 variable "username" {
-  description = "The username tag for resources"
+  description = "Username tag for resources"
 }
